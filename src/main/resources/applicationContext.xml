@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--支持注解-->
+    <mvc:annotation-driven/>
+    <!--配置spring自动扫描包-->
+    <context:component-scan base-package="com.misiai.controller"/>
+    <!--后端jsp文件配置-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--&lt;!&ndash;自定义的异常解析器&ndash;&gt;-->
+    <!--<bean class="com.misiai.resolver.MyExceptionResolver"/>-->
+    <!--&lt;!&ndash;自定义拦截器&ndash;&gt;-->
+    <!--<mvc:interceptors>-->
+    <!--    <mvc:interceptor>-->
+    <!--        &lt;!&ndash;path:即要拦截的路径，不是该路径的不拦截&ndash;&gt;-->
+    <!--        <mvc:mapping path="/inter/**"/>-->
+    <!--        &lt;!&ndash;/** 两星才代表多个路径，如果只有一个*，就只拦截一级路径&ndash;&gt;-->
+    <!--        <bean class="com.misiai.interceptor.MyInterceptor"/>-->
+    <!--    </mvc:interceptor>-->
+
+    <!--</mvc:interceptors>-->
+
+    <!--上传解析器
+        id必须为multipartResolver
+    -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--限制传递大小：bytes-->
+        <property name="maxUploadSize" value="10485760"/>
+
+    </bean>
+
+    <!--国际化-->
+    <!--存储区域设置信息 SessionLocaleResolver类通过一个预定义会话名将区域化信息存储在会话中
+        从session判断用户语言defaultLocale
+       defaultLocale :默认语言-->
+    <bean class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <property name="defaultLocale" value="zh_CN"/>
+    </bean>
+    <!--
+    国际化资源文件 messageSource配置的是国际化资源文件的路径
+    classpath:messages指的是classpath路径下的messages_zh_CN.properties文件和messages_en_US.properties文件
+    设置“useCodeAsDefaultMessage”，默认为false，这样当Spring在ResourceBundle中找不到messageKey的话，就抛出NoSuchMessageException
+    把它设置为True，则找不到不会抛出异常，而是使用messageKey作为返回值
+    -->
+    <bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" id="bundleMessageSource">
+        <property name="defaultEncoding" value="utf-8"/>
+        <property name="useCodeAsDefaultMessage" value="true"/>
+        <property name="basenames">
+            <list>
+                <value>classpath:message_en-US</value>
+                <value>classpath:message_zh-CN</value>
+            </list>
+        </property>
+    </bean>
+    <!--该拦截器通过名为”lang”的参数来拦截HTTP请求，使其重新设置页面的区域化信息 -->
+    <mvc:interceptors>
+        <bean id="localeChangeInterceptor"
+              class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+            <property name="paramName" value="lang"/>
+        </bean>
+    </mvc:interceptors>
+</beans>
